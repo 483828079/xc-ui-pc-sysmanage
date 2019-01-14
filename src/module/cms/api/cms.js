@@ -26,7 +26,7 @@ export const template_all  = () => {
 /*页面添加*/
 export const page_add = params => {
   return http.requestPost(apiUrl+'/cms/page/add',params)
-}
+};
 
 /**
  *
