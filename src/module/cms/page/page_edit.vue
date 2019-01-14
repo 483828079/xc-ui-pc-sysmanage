@@ -1,13 +1,5 @@
 <template>
   <div style="margin: 28px 0 0 0">
-    <!--v-bind:model 将pageForm的值显示在页面上
-      不同于v-model的双向绑定，这里只是响应式，只做响应。
-      下面的每个form组件才是真的双向绑定。
-
-      prop：表单校验的时候用来关联要校验的表单。
-      :rules：校验的对象。
-      status-icon 加上校验状态图标
-    -->
     <el-form :model="pageForm" status-icon :rules="pageFormRules" label-width="80px" ref="pageForm" >
       <el-form-item label="所属站点" prop="siteId">
         <el-select v-model="pageForm.siteId" placeholder="请选择站点" clearable>
@@ -64,11 +56,10 @@
 </template>
 
 <script>
-  import * as cmsApi from '../api/cms' // 导入cms下的所有导出对象。并且作为cmsApi的属性。
+  import * as cmsApi from '../api/cms'
   export default {
     data() {
       return {
-        //新增界面数据,会直接初始化到页面上。
         pageForm: {
           siteId:'',
           templateId:'',
@@ -107,12 +98,8 @@
     },
     methods:{
       addSubmit() {
-        // $refs.pageForm 获取标注了ref属性pageForm值的元素对象。
-        // validate 方法，传入一个返回，会回调该方法并传入参数。
-        // 传入true就是表单校验成功，false就是表单校验失败。
         this.$refs.pageForm.validate((valid) => {
-          if (valid) { // 表单校验成功
-            // 调用api传入要保存的对象
+          if (valid) {
             cmsApi.page_add(this.pageForm).then((rep) => {
               this.$confirm('是否要保存?', '提示', {
                 confirmButtonText: '确定',
@@ -124,8 +111,6 @@
                     type: 'success',
                     message: '添加成功!'
                   });
-                  // 清空表单
-                  // 使用表单元素.resetFields();清空表单。
                   this.$refs.pageForm.resetFields();
                 } else { // 保存失败
                   this.$message({
@@ -139,15 +124,6 @@
         })
       },
       go_back() {
-        // 跳转回列表页面。
-        // 很明显这里是组件的两个属性
-        // $router 会有路由的一些方法。 push添加一些参数都是和url相关的。
-        // path 就是路由跳转的页面，query就是要跳转url上的参数
-        // $route 代表的是当前路由对象，可以从路由对象上拿到当前路由相关信息。这里拿到的是url上的参数。
-        /**
-         * a、通过在路由上添加key/value串使用this.$route.query来取参数，例如：/router1?id=123 ,/router1?id=456 可以通过this.$route.query.id获取参数id的值。
-          b、通过将参数作为路由一部分进行传参数使用this.$route.params来获取，例如：定义的路由为/router1/:id ，请求/router1/123时可以通过this.$route.params.id来获取，此种情况用this.$route.query.id是拿不到的。
-         * */
         this.$router.push({path:"/cms/page/list", query: {
             page: this.$route.query.page,
             siteId: this.$route.query.siteId,
@@ -157,14 +133,19 @@
       }
     },
     created() {
-      // 页面渲染前加载siteList
       cmsApi.site_all().then((res) => {
         this.siteList = res.queryResult.list;
       });
 
-      // 页面渲染前加载templateList
       cmsApi.template_all().then((res) => {
         this.templateList = res.queryResult.list;
+      });
+
+      // 回显页面内容
+      // restful需要通过this.$route.params来获取
+      let pageId = this.$route.params.pageId;
+      cmsApi.page_get(pageId).then((res) => {
+        this.pageForm = res;
       });
 
     }

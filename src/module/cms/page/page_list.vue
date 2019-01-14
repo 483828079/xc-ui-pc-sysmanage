@@ -1,5 +1,6 @@
 <template>
   <div>
+    <el-form :model="params">
     <!--v-model用来绑定和选择后回显-->
     <el-select v-model="params.siteId" clearable placeholder="站点">
       <!--
@@ -48,7 +49,7 @@
     }}">
       <el-button  type="primary" size="small" icon="el-icon-news">新增页面</el-button>
     </router-link>
-
+    </el-form>
     <el-table
       v-loading="loading"
       :data="list"
@@ -66,6 +67,19 @@
       <el-table-column prop="pagePhysicalPath" label="物理路径" width="250">
       </el-table-column>
       <el-table-column prop="pageCreateTime" label="创建时间" width="180" >
+      </el-table-column>
+      <el-table-column
+        fixed="right"
+        label="操作"
+        width="100">
+        <!--父组件中会传来一个值 slot-scope接收
+          page.row代表el-table绑定List生成的该元素对应的的当前行。
+          也就是遍历List渲染页面，page就是当前父组件，row代表List所在索引对象。
+          page.row.pageId代表当前行索引，在List中的pageId。
+        -->
+        <template slot-scope="page">
+          <el-button @click="handleEdit(page.row.pageId)" type="text" size="small">编辑</el-button>
+        </template>
       </el-table-column>
     </el-table>
     <!--
@@ -104,11 +118,11 @@
         list:[], // 默认没有数据
         total:0, // 默认0
         params:{  // 当前页，和每页显示个数由页面提供。这里配置的是默认的页码和每页显示个数。
-          page:1,//页码
+          page:3,//页码
           size:10,//每页显示个数
           siteId: '',
           templateId: '',
-          pageAliase:''
+          pageAliase:'',
         },
         sizes:[5, 10, 20, 30, 50], // 页数列表
         loading: false, // 加载
@@ -164,9 +178,9 @@
     methods:{
       //分页查询, 点击分页的页码后会回调该方法，传入当前页码。
       changePage:function (page) {
-        this.params.page = page;
-        this.loading = true;
-        this.query();
+          this.params.page = page;
+          this.loading = true;
+          this.query();
       },
       handleSizeChange:function (size) { //页码改变后会回调该方法，传入当前选中的size。
         this.params.size = size; // 设置当前页的显示条数。改变页面样式和重新根据size去查询。
@@ -180,9 +194,31 @@
           this.total = res.queryResult.total;
           this.loading = false;
         });
+      }, // 修改后跳转页面
+      handleEdit(pageId) {
+        // 等同于 router-link:to
+        this.$router.push({
+          path:'/cms/page/edit/'+pageId,query:{
+            page: this.params.page,
+            siteId: this.params.siteId,
+            templateId: this.params.templateId,
+            pageAliase: this.params.pageAliase
+          }
+        });
       }
     }, // 组件的声明周期钩子方法和组件的其他属性平级。ES6的语法等同于mounted:function (){}
     created() {
+      // 通过url中的参数初始化
+      // || 的作用，如果||前面那个值为false也就是null 0 "" 等使用||后面的值。
+      this.params.page = Number.parseInt(this.$route.query.page) || 1;
+      this.params.siteId = this.$route.query.siteId || "";
+      this.params.templateId = this.$route.query.templateId || "";
+      this.params.pageAliase = this.$route.query.pageAliase || "" ;
+    },
+    mounted() { // Vue组件实例的声明周期方法，当页面渲染后进行默认的查询。也就是页码1每页显示10条数据。
+      //默认查询页面
+      this.loading = true;
+      this.query();
       // 页面渲染前加载siteList
       cmsApi.site_all().then((res) => {
         this.siteList = res.queryResult.list;
@@ -192,18 +228,6 @@
       cmsApi.template_all().then((res) => {
         this.templateList = res.queryResult.list;
       });
-
-      // 通过url中的参数初始化
-      // || 的作用，如果||前面那个值为false也就是null 0 "" 等使用||后面的值。
-      this.params.page = Number.parseInt(this.$route.query.page || 1);
-      this.params.siteId = this.$route.query.siteId || "";
-      this.params.templateId = this.$route.query.templateId || "";
-      this.params.pageAliase = this.$route.query.pageAliase || "" ;
-    },
-    mounted() { // Vue组件实例的声明周期方法，当页面渲染后进行默认的查询。也就是页码1每页显示10条数据。
-      //默认查询页面
-      this.loading = true;
-      this.query();
     }
   }
 </script>
