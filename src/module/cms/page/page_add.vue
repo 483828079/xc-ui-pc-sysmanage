@@ -94,6 +94,9 @@
           pageName: [
             {required: true, message: '请输入页面名称', trigger: 'blur'}
           ],
+          pageAliase: [
+            {required: true, message: '请输入页面别名', trigger: 'blur'}
+          ],
           pageWebPath: [
             {required: true, message: '请输入访问路径', trigger: 'blur'}
           ],
@@ -122,6 +125,9 @@
                     type: 'success',
                     message: '添加成功!'
                   });
+                  // 清空表单
+                  // 使用表单元素.resetFields();清空表单。
+                  this.$refs.pageForm.resetFields();
                 } else { // 保存失败
                   this.$message({
                     type: 'error',
