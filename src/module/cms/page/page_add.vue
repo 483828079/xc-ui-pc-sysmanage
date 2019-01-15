@@ -127,6 +127,8 @@
                   // 清空表单
                   // 使用表单元素.resetFields();清空表单。
                   this.$refs.pageForm.resetFields();
+                } else if (rep.message) {
+                  this.$message.error(rep.message);
                 } else { // 保存失败
                   this.$message({
                     type: 'error',

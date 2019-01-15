@@ -49,7 +49,7 @@
       ​
     </el-form>
     <div slot="footer" class="dialog-footer">
-      <el-button type="primary" @click="addSubmit" icon="el-icon-circle-check">提交</el-button>
+      <el-button type="primary" @click="editSubmit" icon="el-icon-circle-check">提交</el-button>
       <el-button type="primary" @click="go_back" icon="el-icon-back">返回</el-button>
     </div>
   </div>
@@ -97,11 +97,12 @@
       }
     },
     methods:{
-      addSubmit() {
+      editSubmit() {
         this.$refs.pageForm.validate((valid) => {
           if (valid) {
-            cmsApi.page_add(this.pageForm).then((rep) => {
-              this.$confirm('是否要保存?', '提示', {
+
+            cmsApi.page_edit(this.$route.params.pageId, this.pageForm).then((rep) => {
+              this.$confirm('是否要修改?', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
@@ -109,13 +110,13 @@
                 if (rep.success) { // 保存成功
                   this.$message({
                     type: 'success',
-                    message: '添加成功!'
+                    message: '修改成功!'
                   });
-                  this.$refs.pageForm.resetFields();
+                  this.go_back(); //返回页面
                 } else { // 保存失败
                   this.$message({
                     type: 'error',
-                    message: '添加失败!'
+                    message: '修改失败!'
                   });
                 }
               });

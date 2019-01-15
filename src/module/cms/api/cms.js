@@ -6,7 +6,7 @@ let apiUrl = sysConfig.xcApiUrlPre;
 // 导出一个page_list的方法，调用传入page si ze params获取的是axios的get请求。
 // then 可以回调得到请求的内容。
 
-export const page_list  = (page, size, params) => {
+export const page_list  = function(page, size, params) {
   // params是javascript对象，要想使用get请求需要把它转换为key=value&key=value的形式。
   let paramsInfo = querystring.stringify(params);
   return http.requestQuickGet(apiUrl+'/cms/page/list/'+page+'/'+size + "?" + paramsInfo);
@@ -25,20 +25,23 @@ export const template_all  = () => {
 
 /*页面添加*/
 export const page_add = params => {
-  return http.requestPost(apiUrl+'/cms/page/add',params)
+  return http.requestPost(apiUrl+'/cms/page/add',params);
 };
 
 /*页面查询*/
 export const page_get = id => {
-  return http.requestQuickGet(apiUrl+'/cms/page/get/'+id)
+  return http.requestQuickGet(apiUrl+'/cms/page/get/'+id);
 };
 
 /*页面修改，采用put方法*/
 export const page_edit = (id,params) => {
-  return http.requestPut(apiUrl+'/cms/page/edit/'+id,params)
+  return http.requestPut(apiUrl+'/cms/page/edit/'+id,params);
 };
 
-
+/*页面删除*/
+export const page_del = id => {
+  return http.requestDelete(apiUrl+'/cms/page/del/'+id)
+}
 /**
  *
  * 请求的流程：

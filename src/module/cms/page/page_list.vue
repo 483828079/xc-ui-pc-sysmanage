@@ -79,6 +79,7 @@
         -->
         <template slot-scope="page">
           <el-button @click="handleEdit(page.row.pageId)" type="text" size="small">编辑</el-button>
+          <el-button @click="handleDelete(page.row.pageId)" type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -111,7 +112,6 @@
 
 <script>
   import * as cmsApi from '../api/cms' // 导入cms下的所有导出对象。并且作为cmsApi的属性。
-
   export default {
     data() {
       return {
@@ -184,11 +184,11 @@
       },
       handleSizeChange:function (size) { //页码改变后会回调该方法，传入当前选中的size。
         this.params.size = size; // 设置当前页的显示条数。改变页面样式和重新根据size去查询。
-        this.loading = true;
         this.query();
       },
       //查询
       query:function () { // 根据page和size去查询,将params作为参数按条件查询。
+        this.loading = true;
         cmsApi.page_list(this.params.page, this.params.size, this.params).then((res) => {
           this.list = res.queryResult.list;
           this.total = res.queryResult.total;
@@ -205,19 +205,38 @@
             pageAliase: this.params.pageAliase
           }
         });
+      }, // 删除
+      handleDelete(pageId) {
+        this.$confirm('此操作将永久删除, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          cmsApi.page_del(pageId).then(res => {
+            console.log(res);
+            if (res.success) {
+              this.$message({
+                type: 'success',
+                message: '删除成功!'
+              });
+              // 删除成功刷新页面。
+              this.query();
+            } else {
+              this.$message.error("删除失败！");
+            }
+          });
+        });
       }
     }, // 组件的声明周期钩子方法和组件的其他属性平级。ES6的语法等同于mounted:function (){}
     created() {
       // 通过url中的参数初始化
       // || 的作用，如果||前面那个值为false也就是null 0 "" 等使用||后面的值。
-      this.params.page = Number.parseInt(this.$route.query.page) || 1;
+      this.params.page = /*Number.parseInt(this.$route.query.page) || */1;
       this.params.siteId = this.$route.query.siteId || "";
       this.params.templateId = this.$route.query.templateId || "";
       this.params.pageAliase = this.$route.query.pageAliase || "" ;
     },
     mounted() { // Vue组件实例的声明周期方法，当页面渲染后进行默认的查询。也就是页码1每页显示10条数据。
-      //默认查询页面
-      this.loading = true;
       this.query();
       // 页面渲染前加载siteList
       cmsApi.site_all().then((res) => {
