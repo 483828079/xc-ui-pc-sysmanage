@@ -36,6 +36,10 @@
         <el-input v-model="pageForm.pagePhysicalPath" auto-complete="off" ></el-input>
       </el-form-item>
       ​
+      <el-form-item label="数据路径" prop="dataUrl">
+        <el-input v-model="pageForm.dataUrl" auto-complete="off" ></el-input>
+      </el-form-item>
+
       <el-form-item label="类型">
         <el-radio-group v-model="pageForm.pageType">
           <!--这里label属性是实际的值-->
@@ -68,6 +72,7 @@
           pageWebPath: '',
           pageParameter:'',
           pagePhysicalPath:'',
+          dataUrl: '',
           pageType:'0',
           pageCreateTime: new Date()
         },
@@ -92,6 +97,9 @@
           ],
           pagePhysicalPath: [
             {required: true, message: '请输入物理路径', trigger: 'blur'}
+          ],
+          dataUrl: [
+            {required: true, message: '请输入数据路径', trigger: 'blur'}
           ]
         }
       }
@@ -128,8 +136,10 @@
         this.$router.push({path:"/cms/page/list", query: {
             page: this.$route.query.page,
             siteId: this.$route.query.siteId,
+            pageType: this.$route.query.pageType,
             templateId: this.$route.query.templateId,
-            pageAliase: this.$route.query.pageAliase
+            pageAliase: this.$route.query.pageAliase,
+            pageName: this.$route.query.pageName
           }});
       }
     },

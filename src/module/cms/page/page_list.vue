@@ -28,12 +28,26 @@
         :value="item.templateId">
       </el-option>
     </el-select>
+      <el-select v-model="params.pageType" clearable placeholder="页面类型">
+        <el-option
+          v-for="item in pageTypeList"
+          :key="item.type"
+          :label="item.typeDescription"
+          :value="item.type">
+        </el-option>
+      </el-select>
     <el-input
       placeholder="别名"
       style="width: 100px"
       v-model="params.pageAliase"
       clearable>
     </el-input>
+      <el-input
+        placeholder="名称"
+        style="width: 100px"
+        v-model="params.pageName"
+        clearable>
+      </el-input>
     <el-button @click="query" icon="el-icon-search" type="primary" size="small" style="margin: 17px 0px 13px 5px;">查询</el-button>
 
     <!--
@@ -45,7 +59,9 @@
     page: this.params.page,
     siteId: this.params.siteId,
     templateId: this.params.templateId,
-    pageAliase: this.params.pageAliase
+    pageType: this.params.pageType,
+    pageAliase: this.params.pageAliase,
+    pageName: this.params.pageName
     }}">
       <el-button  type="primary" size="small" icon="el-icon-news">新增页面</el-button>
     </router-link>
@@ -65,6 +81,8 @@
       <el-table-column prop="pageWebPath" label="访问路径" width="250">
       </el-table-column>
       <el-table-column prop="pagePhysicalPath" label="物理路径" width="250">
+      </el-table-column>
+      <el-table-column prop="dataUrl" label="数据路径" width="250">
       </el-table-column>
       <el-table-column prop="pageCreateTime" label="创建时间" width="180" >
       </el-table-column>
@@ -120,31 +138,25 @@
         params:{  // 当前页，和每页显示个数由页面提供。这里配置的是默认的页码和每页显示个数。
           page:3,//页码
           size:10,//每页显示个数
+                    // 按条件查询
           siteId: '',
           templateId: '',
           pageAliase:'',
+          pageName:'',
+          pageType:'',
+          dataUrl:''
         },
         sizes:[5, 10, 20, 30, 50], // 页数列表
         loading: false, // 加载
         siteList:[], // 用来初始化下拉框的site列表
         templateList: [], //用来初始化下拉框的template列表
-        pageFormRules: { // 表单的校验规则
-          siteId:[
-            {required: true, message: '请选择站点', trigger: 'blur'}
-          ],
-          templateId:[
-            {required: true, message: '请选择模版', trigger: 'blur'}
-          ],
-          pageName: [
-            {required: true, message: '请输入页面名称', trigger: 'blur'}
-          ],
-          pageWebPath: [
-            {required: true, message: '请输入访问路径', trigger: 'blur'}
-          ],
-          pagePhysicalPath: [
-            {required: true, message: '请输入物理路径', trigger: 'blur'}
-          ]
-        }
+        pageTypeList:[{
+          type: '0',
+          typeDescription: '静态'
+        },{
+          type: '1',
+          typeDescription: '动态'
+        }]
       }
     },
     computed: {
@@ -154,23 +166,39 @@
       templateId() {
         return this.params.templateId;
       },
+      pageType() {
+        return this.params.pageType;
+      },
       pageAliase() {
         return this.params.pageAliase;
+      },
+      pageName() {
+        return this.params.pageName
       }
     },
     watch: {
-      siteId: function (newParams) {
-        if (!newParams) {
+      siteId: function (newSiteId) {
+        if (!newSiteId) {
           this.query();
         }
       },
-      templateId: function (newParams) {
-        if (!newParams) {
+      templateId: function (newTemplateId) {
+        if (!newTemplateId) {
           this.query();
         }
       },
-      pageAliase: function (newParams) {
-        if (!newParams) {
+      pageType: function(newPageType) {
+        if (!newPageType) {
+          this.query();
+        }
+      },
+      pageAliase: function (newPageAliase) {
+        if (!newPageAliase) {
+          this.query();
+        }
+      },
+      pageName: function (newPageName) {
+        if (!newPageName) {
           this.query();
         }
       }
@@ -201,8 +229,10 @@
           path:'/cms/page/edit/'+pageId,query:{
             page: this.params.page,
             siteId: this.params.siteId,
+            pageType: this.params.pageType,
             templateId: this.params.templateId,
-            pageAliase: this.params.pageAliase
+            pageAliase: this.params.pageAliase,
+            pageName: this.params.pageName
           }
         });
       }, // 删除
@@ -235,6 +265,8 @@
       this.params.siteId = this.$route.query.siteId || "";
       this.params.templateId = this.$route.query.templateId || "";
       this.params.pageAliase = this.$route.query.pageAliase || "" ;
+      this.params.pageName = this.$route.query.pageName || "";
+      this.params.pageType = this.$route.query.pageType || "";
     },
     mounted() { // Vue组件实例的声明周期方法，当页面渲染后进行默认的查询。也就是页码1每页显示10条数据。
       this.query();
